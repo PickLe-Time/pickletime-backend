@@ -8,7 +8,7 @@ on:
 
 jobs:
   test:
-    runs-on: PickLe-Time/pickletime-backend/.github/workflows/test.yml@main
+    uses: PickLe-Time/pickletime-backend/.github/workflows/test.yml@main
 
   build-publish:
     needs: test

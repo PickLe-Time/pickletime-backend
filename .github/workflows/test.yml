@@ -9,7 +9,7 @@ on:
 
 jobs:
   test:
-    uses: ubuntu-latest
+    runs-on: ubuntu-latest
 
     container:
       image: node:20-alpine
