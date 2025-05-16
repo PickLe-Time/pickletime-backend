@@ -1,33 +1,37 @@
 {
-  "name": "@krisvan/pickleballscheduler",
-  "homepage": "",
+  "name": "@krisvan/pickleballscheduler-api",
+  "homepage": "https://krisvan.github.io/Pickleball-Scheduler/",
   "version": "0.1.0",
   "private": true,
-  "workspaces": [
-    "packages/server",
-    "packages/web"
-  ],
-  "scripts": {
-    
-    "lint": "concurrently \"npm run lint --prefix packages/web\" \"npm run lint --prefix packages/server\"",
-    "lint:fix": "npm run lint:fix --prefix packages/web",
-    "start": "concurrently \"npm run start --prefix packages/web\" \"npm run start --prefix packages/server\" --kill-others",
-    "test": "npm run test --prefix packages/web"
+  "type": "module",
+  "dependencies": {
+    "@fastify/cookie": "^9.3.0",
+    "@fastify/cors": "^8.5.0",
+    "@fastify/jwt": "^8.0.0",
+    "@prisma/client": "^5.7.1",
+    "bcrypt": "^5.1.1",
+    "dotenv": "^16.4.5",
+    "dotenv-cli": "^7.4.2",
+    "fastify": "^4.24.3",
+    "fastify-zod": "^1.4.0",
+    "pino": "8.16.2",
+    "zod": "^3.22.4"
   },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
+  "prisma": {
+    "seed": "node prisma/seed.js"
+  },
+  "scripts": {
+    "seed": "npx prisma db seed",
+    "studio": "npx prisma studio",
+    "start": "dotenv -e .env -- node ./src/index.js",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2",
-    "nodemon": "^3.0.1"
+    "@eslint/js": "^9.26.0",
+    "@types/bcrypt": "^5.0.2",
+    "eslint": "^9.26.0",
+    "globals": "^16.0.0",
+    "prisma": "^5.7.1"
   }
 }

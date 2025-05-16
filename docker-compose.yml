@@ -1,0 +1,26 @@
+services:
+  backend:
+    image: ghcr.io/pickle-time/pickletime-backend:latest
+    container_name: backend
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+    command: ["npm", "run", "start"]
+  postgres:
+    image: postgres:15
+    container_name: postgres-db
+    env_file:
+      - .env
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
