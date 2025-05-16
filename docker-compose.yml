@@ -1,10 +1,10 @@
 services:
   backend:
-    image: ghcr.io/krisvan/pickleball-scheduler/backend:latest
+    image: ghcr.io/pickle-time/pickletime-backend:latest
     container_name: backend
     build:
       context: .
-      dockerfile: DockerFile
+      dockerfile: Dockerfile
     ports:
       - "5000:5000"
     env_file:

@@ -1,5 +1,5 @@
-# docker build -t ghcr.io/krisvan/pickleball-scheduler/backend:latest .
-# docker run -d --name backend -p 5000:5000 ghcr.io/krisvan/pickleball-scheduler/backend:latest
+# docker build -t ghcr.io/pickle-time/pickletime-backend:latest .
+# docker run -d --name backend -p 5000:5000 ghcr.io/pickle-time/pickletime-backend:latest
 
 FROM node:20
 WORKDIR /app
