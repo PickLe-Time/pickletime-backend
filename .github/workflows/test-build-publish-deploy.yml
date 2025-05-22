@@ -40,6 +40,7 @@ jobs:
           push: true
           platforms: linux/amd64,linux/arm64
           tags: ghcr.io/pickle-time/pickletime-backend:latest
+
   deploy:
     needs: build-publish
     runs-on: ubuntu-latest
@@ -49,7 +50,7 @@ jobs:
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER}}
+          username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd /home/opc/projects/pickletime/pickletime-infra
