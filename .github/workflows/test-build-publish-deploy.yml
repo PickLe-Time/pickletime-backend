@@ -1,4 +1,4 @@
-name: Test, Build, and Publish Image
+name: Test, Build, Publish Image, and Deploy
 
 on:
   push:
