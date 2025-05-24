@@ -23,7 +23,7 @@ jobs:
         run: mkdir -p ~/.npm
       - uses: actions/cache@v3
         with:
-          path: /root/.npm
+          path: ~/.npm
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
