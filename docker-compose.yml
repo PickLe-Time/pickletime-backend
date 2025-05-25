@@ -1,6 +1,5 @@
 services:
   backend:
-    image: ghcr.io/pickle-time/pickletime-backend:latest
     container_name: backend
     build:
       context: .
@@ -11,7 +10,8 @@ services:
       - .env
     depends_on:
       - postgres
-    command: ["npm", "run", "start"]
+    command: [ "sh", "-c", "npx prisma migrate dev && npm run seed && npm run start" ]
+    
   postgres:
     image: postgres:15
     container_name: postgres-db
