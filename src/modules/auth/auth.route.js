@@ -1,7 +1,7 @@
 import {
   handleLogin,
   handleLogout,
-  handleRefreshToken,
+  handleRefresh,
 } from './auth.controller.js';
 import { $ref } from './auth.schema.js';
 
@@ -24,9 +24,9 @@ export async function authRoutes(app) {
   app.delete('/logout', handleLogout);
 
   //  Gives new access token if refresh token is still valid
-  app.get(
-    '/refreshtoken',
-    handleRefreshToken,
+  app.post(
+    '/refresh',
+    handleRefresh,
   );
 
   app.log.info('Auth routes registered');

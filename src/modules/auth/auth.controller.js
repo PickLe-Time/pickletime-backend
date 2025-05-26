@@ -77,7 +77,7 @@ export async function handleLogout(req, reply) {
 }
 
 //  Gives new access token if refresh token is still valid
-export async function handleRefreshToken(req, reply) {
+export async function handleRefresh(req, reply) {
   const { cookies } = req;
   // Check if cookie exists with jwt
   if (!cookies?.refreshJWT) {
