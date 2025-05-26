@@ -58,12 +58,12 @@ export async function handleGetUsers(req, reply) {
   return reply.code(200).send(users);
 }
 
-// Get user by username
-export async function handleGetUserByUsername(req, reply) {
-  const { username } = req.params;
+// Get user by id
+export async function handleGetUserByID(req, reply) {
+  const { id } = req.params;
   const user = await prisma.user.findUnique({
     where: {
-      username,
+      id,
     },
     select: {
       username: true,
@@ -72,6 +72,11 @@ export async function handleGetUserByUsername(req, reply) {
       role: true,
     },
   });
+  if (!user) {
+    return reply.code(404).send({
+      message: 'User not found',
+    });
+  }
   return reply.code(200).send(user);
 }
 

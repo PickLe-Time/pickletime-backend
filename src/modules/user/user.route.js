@@ -1,5 +1,5 @@
 import {
-  handleCreateUser, handleGetUsers, handleGetUserByUsername,
+  handleCreateUser, handleGetUsers, handleGetUserByID,
   handleGetSessionsByUser, handlePostSessionsByUser,
   handleUpdateUser, handlePatchUserByUsername, handleDeleteUser,
   handleGetSettingByUsername, handleUpdateSettingByUsername,
@@ -28,13 +28,13 @@ export async function userRoutes(app) {
     },
     handleCreateUser,
   );
-  // Get user by username at /api/users/username. Requires auth
+  // Get user by id at /api/users/:id. Requires auth
   app.get(
-    '/:username',
+    '/:id',
     {
       preHandler: [app.verifyJWT],
     },
-    handleGetUserByUsername,
+    handleGetUserByID,
   );
   // Update user by id at Put /api/users/:id. Requires auth
   app.put(
