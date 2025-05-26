@@ -39,8 +39,9 @@ export async function handleLogin(req, reply) {
     secure: true,
   });
 
-  // Return access token, username, displayName, and role
+  // Return access id, token, username, displayName, and role
   return {
+    id: user.id,
     accessToken,
     username: user.username,
     displayName: user.displayName,
