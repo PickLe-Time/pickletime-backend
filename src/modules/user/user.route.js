@@ -67,9 +67,9 @@ export async function userRoutes(app) {
     handleDeleteUser,
   );
 
-  // Get all sessions at /api/users/:username/sessions. Requires auth
+  // Get all sessions at /api/users/:id/sessions. Requires auth
   app.get(
-    '/:username/sessions',
+    '/:id/sessions',
     {
       preHandler: [app.verifyJWT],
     },

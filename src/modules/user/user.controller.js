@@ -201,15 +201,13 @@ export async function handleDeleteUser(req, reply) {
   return reply.code(204).send();
 }
 
-// Get sessions that match username
+// Get sessions that match user ud
 export async function handleGetSessionsByUser(req, reply) {
-  let { username } = req.params;
-  // Validate data
-  username = username.toLowerCase();
+  let { id } = req.params;
   // Check if user exists
   const foundUser = await prisma.user.findUnique({
     where: {
-      username,
+      id,
     },
   });
   if (!foundUser) {
@@ -219,7 +217,7 @@ export async function handleGetSessionsByUser(req, reply) {
   }
   const sessions = await prisma.session.findMany({
     where: {
-      username,
+      user: { id },
     },
     select: {
       id: true,
