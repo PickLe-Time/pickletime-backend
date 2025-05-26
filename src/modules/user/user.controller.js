@@ -178,13 +178,11 @@ export async function handlePatchUserByUsername(req, reply) {
 
 // Delete user that matches username
 export async function handleDeleteUser(req, reply) {
-  let { username } = req.params;
-  // Validate data
-  username = username.toLowerCase();
+  let { id } = req.params;
   // Check if user exists
   const foundUser = await prisma.user.findUnique({
     where: {
-      username,
+      id,
     },
   });
   if (!foundUser) {
@@ -195,7 +193,7 @@ export async function handleDeleteUser(req, reply) {
   // Delete user
   await prisma.user.delete({
     where: {
-      username,
+      id,
     },
   });
   return reply.code(204).send();

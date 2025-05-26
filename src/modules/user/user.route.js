@@ -58,9 +58,9 @@ export async function userRoutes(app) {
     },
     handlePatchUserByUsername,
   );
-  // Delete a user given username at /api/users/:username. Requires auth
+  // Delete a user given id at /api/users/:id. Requires auth
   app.delete(
-    '/:username',
+    '/:id',
     {
       preHandler: [app.verifyJWT],
     },
