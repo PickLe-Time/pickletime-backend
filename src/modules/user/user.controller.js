@@ -1,4 +1,5 @@
 import bcrypt from 'bcrypt';
+import crypto from 'crypto';
 import prisma from '../../utils/prisma.js';
 
 const SALT_ROUNDS = 10;
