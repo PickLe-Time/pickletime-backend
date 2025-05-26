@@ -1,11 +1,6 @@
 import { z } from 'zod';
 import { buildJsonSchemas } from 'fastify-zod';
 
-// Set sessions by usernbame
-const getSessionByUserSchema = z.object({
-  username: z.string().min(3),
-});
-
 // Update Session
 const updateSessionSchema = z.object({
   creationDate: z.date().optional(),
