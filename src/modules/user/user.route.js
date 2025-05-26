@@ -17,7 +17,7 @@ export async function userRoutes(app) {
   );
   // Register new user
   app.post(
-    '/register',
+    '/',
     {
       schema: {
         body: $ref('createUserSchema'),
