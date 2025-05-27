@@ -123,8 +123,8 @@ export async function handleUpdateUser(req, reply) {
 }
 
 // Patches existing user.
-export async function handlePatchUserByUsername(req, reply) {
-  const { username: oldUsername } = req.params;
+export async function handlePatchUserByID(req, reply) {
+  const { id: userID } = req.params;
   let { username } = req.body;
   const { password, settings, ...props } = req.body;
 
@@ -138,7 +138,7 @@ export async function handlePatchUserByUsername(req, reply) {
       // If new password, hash new.
       const oldUsersList = await prisma.user.findMany({
         where: {
-          username: oldUsername,
+          id: userID,
         },
         select: {
           password: true,
@@ -154,23 +154,36 @@ export async function handlePatchUserByUsername(req, reply) {
     // Patch user
     const user = await prisma.user.update({
       where: {
-        username: oldUsername,
+        id: userID,
       },
       data: {
         ...props,
         username,
         password: newPassword,
-        settings: {
-          update: {
-            ...settings,
+        ...(settings && {
+          settings: {
+            update: settings,
           },
-        },
+        }),
       },
       include: {
         settings: true,
       },
     });
-    return reply.code(200).send(user);
+    const filteredUser = {
+      id: user.id,
+      username: user.username,
+      displayName: user.displayName,
+      role: user.role,
+      settings: user.settings
+        ? {
+            id: user.settings.id,
+            theme: user.settings.theme,
+            color: user.settings.color,
+          }
+        : null,
+    };
+    return reply.code(200).send(filteredUser);
   } catch (e) {
     return reply.code(500).send(e);
   }
