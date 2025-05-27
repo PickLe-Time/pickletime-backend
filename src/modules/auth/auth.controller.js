@@ -119,11 +119,12 @@ export async function handleRefresh(req, reply) {
   );
   const accessToken = await reply.jwtSign(payload, { expiresIn: '15m' });
   return reply.code(200).send({
-    accessToken,
+    id: foundUser.id,
     username: foundUser.username,
     displayName: foundUser.displayName,
     role: foundUser.role,
-    theme: userSettings.theme,
     color: userSettings.color,
+    theme: userSettings.theme,
+    accessToken,
   });
 }
