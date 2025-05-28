@@ -1,6 +1,4 @@
 import prisma from '../../utils/prisma.js';
-import { flattenSessionsWithUser } from '../../utils/flattenSessionsWithUser.js';
-
 
 // Get all sessions
 export async function handleGetSessions(req, reply) {
@@ -19,7 +17,7 @@ export async function handleGetSessions(req, reply) {
       },
     },
   });
-  return reply.code(200).send(flattenSessionsWithUser(sessions));
+  return reply.code(200).send(sessions);
 }
 
 // Get session that match session id
