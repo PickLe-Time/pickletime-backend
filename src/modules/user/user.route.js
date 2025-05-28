@@ -75,9 +75,9 @@ export async function userRoutes(app) {
     },
     handleGetSessionsByUser,
   );
-  // Create new session at /api/sessions/:username. Requires auth
+  // Create new session at /api/users/:id/sessions/. Requires auth
   app.post(
-    '/:username/sessions',
+    '/:id/sessions',
     {
       preHandler: [app.verifyJWT],
       schema: {
