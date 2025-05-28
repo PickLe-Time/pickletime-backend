@@ -1,6 +1,7 @@
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 import prisma from '../../utils/prisma.js';
+import { flattenSessionsWithUser } from '../../utils/flattenSessionsWithUser.js';
 
 const SALT_ROUNDS = 10;
 
@@ -212,7 +213,7 @@ export async function handleDeleteUser(req, reply) {
   return reply.code(204).send();
 }
 
-// Get sessions that match user ud
+// Get sessions that match user id
 export async function handleGetSessionsByUser(req, reply) {
   let { id } = req.params;
   // Check if user exists
@@ -230,34 +231,36 @@ export async function handleGetSessionsByUser(req, reply) {
     where: {
       user: { id },
     },
-    select: {
-      id: true,
-      creationDate: true,
-      startTime: true,
-      endTime: true,
-      username: true,
+    include: {
+      user: {
+        select: {
+          username: true,
+        },
+      },
     },
   });
-  return reply.code(200).send(sessions);
+  // Flatten nested values
+  const formattedSessions = flattenSessionsWithUser(sessions);
+
+  return reply.code(200).send(formattedSessions);
 }
 
 // Create sessions from user
 export async function handlePostSessionsByUser(req, reply) {
-  let { username } = req.params;
-  let { id } = req.body;
+  let { id : userId} = req.params;
+  let { id : sessionID } = req.body;
   const { startTime, endTime } = req.body;
-  // Validate data
-  username = username.toLowerCase();
+  // Validate start time is before end time
   if (startTime > endTime) {
     return reply.code(400).send({
       message: 'Start time cannot be after end time',
     });
   }
-  if (!id) id = crypto.randomUUID();
+  if (!sessionID) sessionID = crypto.randomUUID();
   // Check if user exists
   const foundUser = await prisma.user.findUnique({
     where: {
-      username,
+      id: userId,
     },
   });
   if (!foundUser) {
@@ -269,13 +272,13 @@ export async function handlePostSessionsByUser(req, reply) {
   try {
     const session = await prisma.session.create({
       data: {
-        id,
-        username,
+        id: sessionID,
+        userId: userId,
         startTime,
         endTime,
       },
     });
-    return reply.code(201).send(session);
+    return reply.code(201).send({...session, username: foundUser.username});
   } catch (e) {
     return reply.code(500).send(e);
   }

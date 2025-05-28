@@ -1,6 +1,8 @@
 import prisma from '../../utils/prisma.js';
+import { flattenSessionsWithUser } from '../../utils/flattenSessionsWithUser.js';
 
-// Get sessions that match username
+
+// Get all sessions
 export async function handleGetSessions(req, reply) {
   const sessions = await prisma.session.findMany({
     select: {
@@ -8,17 +10,22 @@ export async function handleGetSessions(req, reply) {
       creationDate: true,
       startTime: true,
       endTime: true,
-      username: true,
-      user: true,
+      userId: true,
+      user: {
+        select: {
+          username: true,
+          displayName: true,
+        }
+      },
     },
   });
-  return reply.code(200).send(sessions);
+  return reply.code(200).send(flattenSessionsWithUser(sessions));
 }
 
 // Get session that match session id
 export async function handleGetSessionsBySessionID(req, reply) {
   const { sessionid } = req.params;
-  const sessions = await prisma.session.findUnique({
+  const session = await prisma.session.findUnique({
     where: {
       id: sessionid,
     },
@@ -27,10 +34,19 @@ export async function handleGetSessionsBySessionID(req, reply) {
       creationDate: true,
       startTime: true,
       endTime: true,
-      username: true,
+      user: {
+        select: {
+          username: true,
+          displayName: true,
+        }
+      },
     },
   });
-  return reply.code(200).send(sessions);
+  if (!session) {
+    return reply.code(404).send({ error: 'Session not found' });
+  }
+  const { user, ...sessionFields } = session;  // separate user from session object
+  return reply.code(200).send({...sessionFields, ...user});
 }
 
 // Updates existing session.
