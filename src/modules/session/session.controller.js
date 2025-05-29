@@ -22,10 +22,10 @@ export async function handleGetSessions(req, reply) {
 
 // Get session that match session id
 export async function handleGetSessionsBySessionID(req, reply) {
-  const { sessionid } = req.params;
+  const { id } = req.params;
   const session = await prisma.session.findUnique({
     where: {
-      id: sessionid,
+      id: id,
     },
     select: {
       id: true,
@@ -51,10 +51,9 @@ export async function handleGetSessionsBySessionID(req, reply) {
 export async function handleUpdateSession(req, reply) {
   const { id } = req.params;
   const {
-    username, startTime, endTime, ...props
+     startTime, endTime, userId, ...props
   } = req.body;
   // Validate data
-  const validatedUsername = username.toLowerCase();
   if (startTime > endTime) {
     return reply.code(400).send({
       message: 'Start time cannot be after end time',
@@ -63,7 +62,7 @@ export async function handleUpdateSession(req, reply) {
   // Check if user exists
   const foundUser = await prisma.user.findUnique({
     where: {
-      username: validatedUsername,
+      id: userId,
     },
   });
   if (!foundUser) {
@@ -81,7 +80,7 @@ export async function handleUpdateSession(req, reply) {
         ...props,
         startTime,
         endTime,
-        username: validatedUsername,
+        userId: userId,
       },
     });
     return reply.code(200).send(session);
@@ -90,12 +89,12 @@ export async function handleUpdateSession(req, reply) {
   }
 }
 
-// Delete sessions that matches sessionid
+// Delete sessions that matches id
 export async function handleDeleteSession(req, reply) {
-  const { sessionid } = req.params;
+  const { id } = req.params;
   await prisma.session.delete({
     where: {
-      id: sessionid,
+      id: id,
     },
   });
   return reply.code(204).send();

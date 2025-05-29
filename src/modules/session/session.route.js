@@ -13,7 +13,7 @@ export async function sessionRoutes(app) {
 
   // Get session at /api/sessions/:sessionid. Requires auth
   app.get(
-    '/:sessionid',
+    '/:id',
     {
       preHandler: [app.verifyJWT],
     },
@@ -34,7 +34,7 @@ export async function sessionRoutes(app) {
 
   // Delete a session given ID at /api/sessions/. Requires auth
   app.delete(
-    '/:sessionid',
+    '/:id',
     {
       preHandler: [app.verifyJWT],
     },
