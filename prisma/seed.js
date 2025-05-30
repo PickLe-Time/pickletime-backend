@@ -5,18 +5,18 @@ export async function createUserIfNotExists(userData) {
     where: { username: userData.username },
   });
   if (existingUser) {
-    console.log(`⚠️  User "${userData.username}" already exists. Skipping.`);
+    console.log(`  User "${userData.username}" already exists. Skipping.`);
     return;
   }
   await prisma.user.create({
     data: userData,
   });
-  console.log(`✅ Created user "${userData.username}".`);
+  console.log(`  Created user "${userData.username}".`);
 }
 
 // Passwords are password when not encrypted
 async function main() {
-  console.log('\n🌱 Starting database seeding...\n');
+  console.log('\n🌱 Starting database seeding...');
   await createUserIfNotExists({
     username: 'admin',
       displayName: 'admin',
@@ -66,7 +66,7 @@ async function main() {
     settings: { create: {} },
   });
  
-  console.log('\n✅ Seeding finished successfully.\n');
+  console.log('✅ Seeding finished successfully.\n');
 }
 
 main()
