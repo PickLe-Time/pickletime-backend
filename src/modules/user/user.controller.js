@@ -245,17 +245,18 @@ export async function handleGetSessionsByUser(req, reply) {
   return reply.code(200).send(formattedSessions);
 }
 
-// Create sessions from user
+// Create sessions from user /api/users/:id/sessions/
 export async function handlePostSessionsByUser(req, reply) {
   let { id : userId} = req.params;
   let { id : sessionID } = req.body;
-  const { startTime, endTime } = req.body;
+  const { startTime, endTime, username } = req.body;
   // Validate start time is before end time
   if (startTime > endTime) {
     return reply.code(400).send({
       message: 'Start time cannot be after end time',
     });
   }
+
   if (!sessionID) sessionID = crypto.randomUUID();
   // Check if user exists
   const foundUser = await prisma.user.findUnique({
@@ -264,9 +265,21 @@ export async function handlePostSessionsByUser(req, reply) {
     },
   });
   if (!foundUser) {
-    return reply.code(404).send({
-      message: 'User not found',
-    });
+    // If username is provided, check if user exists by username
+    if (username) {
+      const foundUserByUsername = await prisma.user.findUnique({
+        where: {
+          username: username.toLowerCase(),
+        },
+      });
+      if (foundUserByUsername) {
+        userId = foundUserByUsername.id;
+      } else {
+        return reply.code(404).send({
+          message: 'User not found',
+        });
+      }
+    }
   }
   // Create session
   try {
@@ -278,7 +291,8 @@ export async function handlePostSessionsByUser(req, reply) {
         endTime,
       },
     });
-    return reply.code(201).send({...session, username: foundUser.username});
+    return reply.code(201).send({...session});
+    // return reply.code(201).send({...session, username: foundUser.username});
   } catch (e) {
     return reply.code(500).send(e);
   }

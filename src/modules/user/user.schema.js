@@ -42,6 +42,7 @@ const patchUserByIDSchema = z.object({
 // Create Session
 const createSessionSchema = z.object({
   id: z.string().optional(),
+  username: z.string().min(3).max(24).optional(),
   startTime: z.date(),
   endTime: z.date(),
 });
