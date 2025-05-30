@@ -39,8 +39,9 @@ export async function handleLogin(req, reply) {
     secure: true,
   });
 
-  // Return access token, username, displayName, and role
+  // Return access id, token, username, displayName, and role
   return {
+    id: user.id,
     accessToken,
     username: user.username,
     displayName: user.displayName,
@@ -76,7 +77,7 @@ export async function handleLogout(req, reply) {
 }
 
 //  Gives new access token if refresh token is still valid
-export async function handleRefreshToken(req, reply) {
+export async function handleRefresh(req, reply) {
   const { cookies } = req;
   // Check if cookie exists with jwt
   if (!cookies?.refreshJWT) {
@@ -118,11 +119,12 @@ export async function handleRefreshToken(req, reply) {
   );
   const accessToken = await reply.jwtSign(payload, { expiresIn: '15m' });
   return reply.code(200).send({
-    accessToken,
+    id: foundUser.id,
     username: foundUser.username,
     displayName: foundUser.displayName,
     role: foundUser.role,
-    theme: userSettings.theme,
     color: userSettings.color,
+    theme: userSettings.theme,
+    accessToken,
   });
 }

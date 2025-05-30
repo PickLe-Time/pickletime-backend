@@ -13,6 +13,7 @@ const loginSchema = z.object({
 });
 
 const loginResponseSchema = z.object({
+  id: z.string(),
   accessToken: z.string(),
   username: z.string(),
   displayName: z.string(),

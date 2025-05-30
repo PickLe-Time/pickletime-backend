@@ -1,5 +1,7 @@
 import bcrypt from 'bcrypt';
+import crypto from 'crypto';
 import prisma from '../../utils/prisma.js';
+import { flattenSessionsWithUser } from '../../utils/flattenSessionsWithUser.js';
 
 const SALT_ROUNDS = 10;
 
@@ -57,12 +59,12 @@ export async function handleGetUsers(req, reply) {
   return reply.code(200).send(users);
 }
 
-// Get user by username
-export async function handleGetUserByUsername(req, reply) {
-  const { username } = req.params;
+// Get user by id
+export async function handleGetUserByID(req, reply) {
+  const { id } = req.params;
   const user = await prisma.user.findUnique({
     where: {
-      username,
+      id,
     },
     select: {
       username: true,
@@ -71,6 +73,11 @@ export async function handleGetUserByUsername(req, reply) {
       role: true,
     },
   });
+  if (!user) {
+    return reply.code(404).send({
+      message: 'User not found',
+    });
+  }
   return reply.code(200).send(user);
 }
 
@@ -117,8 +124,8 @@ export async function handleUpdateUser(req, reply) {
 }
 
 // Patches existing user.
-export async function handlePatchUserByUsername(req, reply) {
-  const { username: oldUsername } = req.params;
+export async function handlePatchUserByID(req, reply) {
+  const { id: userID } = req.params;
   let { username } = req.body;
   const { password, settings, ...props } = req.body;
 
@@ -132,7 +139,7 @@ export async function handlePatchUserByUsername(req, reply) {
       // If new password, hash new.
       const oldUsersList = await prisma.user.findMany({
         where: {
-          username: oldUsername,
+          id: userID,
         },
         select: {
           password: true,
@@ -148,23 +155,36 @@ export async function handlePatchUserByUsername(req, reply) {
     // Patch user
     const user = await prisma.user.update({
       where: {
-        username: oldUsername,
+        id: userID,
       },
       data: {
         ...props,
         username,
         password: newPassword,
-        settings: {
-          update: {
-            ...settings,
+        ...(settings && {
+          settings: {
+            update: settings,
           },
-        },
+        }),
       },
       include: {
         settings: true,
       },
     });
-    return reply.code(200).send(user);
+    const filteredUser = {
+      id: user.id,
+      username: user.username,
+      displayName: user.displayName,
+      role: user.role,
+      settings: user.settings
+        ? {
+            id: user.settings.id,
+            theme: user.settings.theme,
+            color: user.settings.color,
+          }
+        : null,
+    };
+    return reply.code(200).send(filteredUser);
   } catch (e) {
     return reply.code(500).send(e);
   }
@@ -172,13 +192,11 @@ export async function handlePatchUserByUsername(req, reply) {
 
 // Delete user that matches username
 export async function handleDeleteUser(req, reply) {
-  let { username } = req.params;
-  // Validate data
-  username = username.toLowerCase();
+  let { id } = req.params;
   // Check if user exists
   const foundUser = await prisma.user.findUnique({
     where: {
-      username,
+      id,
     },
   });
   if (!foundUser) {
@@ -189,21 +207,19 @@ export async function handleDeleteUser(req, reply) {
   // Delete user
   await prisma.user.delete({
     where: {
-      username,
+      id,
     },
   });
   return reply.code(204).send();
 }
 
-// Get sessions that match username
+// Get sessions that match user id
 export async function handleGetSessionsByUser(req, reply) {
-  let { username } = req.params;
-  // Validate data
-  username = username.toLowerCase();
+  let { id } = req.params;
   // Check if user exists
   const foundUser = await prisma.user.findUnique({
     where: {
-      username,
+      id,
     },
   });
   if (!foundUser) {
@@ -213,54 +229,70 @@ export async function handleGetSessionsByUser(req, reply) {
   }
   const sessions = await prisma.session.findMany({
     where: {
-      username,
+      user: { id },
     },
-    select: {
-      id: true,
-      creationDate: true,
-      startTime: true,
-      endTime: true,
-      username: true,
+    include: {
+      user: {
+        select: {
+          username: true,
+        },
+      },
     },
   });
-  return reply.code(200).send(sessions);
+  // Flatten nested values
+  const formattedSessions = flattenSessionsWithUser(sessions);
+
+  return reply.code(200).send(formattedSessions);
 }
 
-// Create sessions from user
+// Create sessions from user /api/users/:id/sessions/
 export async function handlePostSessionsByUser(req, reply) {
-  let { username } = req.params;
-  let { id } = req.body;
-  const { startTime, endTime } = req.body;
-  // Validate data
-  username = username.toLowerCase();
+  let { id : userId} = req.params;
+  let { id : sessionID } = req.body;
+  const { startTime, endTime, username } = req.body;
+  // Validate start time is before end time
   if (startTime > endTime) {
     return reply.code(400).send({
       message: 'Start time cannot be after end time',
     });
   }
-  if (!id) id = crypto.randomUUID();
+
+  if (!sessionID) sessionID = crypto.randomUUID();
   // Check if user exists
   const foundUser = await prisma.user.findUnique({
     where: {
-      username,
+      id: userId,
     },
   });
   if (!foundUser) {
-    return reply.code(404).send({
-      message: 'User not found',
-    });
+    // If username is provided, check if user exists by username
+    if (username) {
+      const foundUserByUsername = await prisma.user.findUnique({
+        where: {
+          username: username.toLowerCase(),
+        },
+      });
+      if (foundUserByUsername) {
+        userId = foundUserByUsername.id;
+      } else {
+        return reply.code(404).send({
+          message: 'User not found',
+        });
+      }
+    }
   }
   // Create session
   try {
     const session = await prisma.session.create({
       data: {
-        id,
-        username,
+        id: sessionID,
+        userId: userId,
         startTime,
         endTime,
       },
     });
-    return reply.code(201).send(session);
+    return reply.code(201).send({...session});
+    // return reply.code(201).send({...session, username: foundUser.username});
   } catch (e) {
     return reply.code(500).send(e);
   }

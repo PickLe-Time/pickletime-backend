@@ -28,7 +28,7 @@ const updateUserSchema = z.object({
 });
 
 // Patch user schema
-const patchUserByUsernameSchema = z.object({
+const patchUserByIDSchema = z.object({
   username: z.string().min(3).max(24).optional(),
   password: z.string().min(6).optional(),
   displayName: z.string().min(3).max(24).optional(),
@@ -42,6 +42,7 @@ const patchUserByUsernameSchema = z.object({
 // Create Session
 const createSessionSchema = z.object({
   id: z.string().optional(),
+  username: z.string().min(3).max(24).optional(),
   startTime: z.date(),
   endTime: z.date(),
 });
@@ -60,6 +61,6 @@ export const { schemas: userSchemas, $ref } = buildJsonSchemas({
   createUserResponseSchema,
   createSessionSchema,
   updateUserSchema,
-  patchUserByUsernameSchema,
+  patchUserByIDSchema,
   updateUserSettingsSchema,
 }, { $id: 'userSchemas' });

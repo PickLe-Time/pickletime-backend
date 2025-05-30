@@ -17,8 +17,8 @@ async function main() {
     where: { username: 'alice123' },
     update: {},
     create: {
-      username: 'alice123',
-      displayName: 'alice',
+      username: 'user',
+      displayName: 'userDisplay',
       password: '$2b$10$04xyjuFXfrfEqjY.hyzWR.Cx3dtzHsf6T1.9hBcIzmCfrqL5tKg2S',
       role: 'BASIC',
       sessions: {
@@ -34,8 +34,8 @@ async function main() {
     where: { username: 'cvan4' },
     update: {},
     create: {
-      username: 'cvan4',
-      displayName: 'Chris Van',
+      username: 'user2',
+      displayName: 'user2',
       password: '$2b$10$04xyjuFXfrfEqjY.hyzWR.Cx3dtzHsf6T1.9hBcIzmCfrqL5tKg2S',
       role: 'BASIC',
       sessions: {

@@ -10,12 +10,17 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Role {
+  ADMIN
+  BASIC
+}
+
 model User {
   id           String    @id @default(uuid())
   username     String    @unique
   displayName  String
   password     String
-  role         String
+  role         Role
   refreshToken String?   @unique
   sessions     Session[]
   settings     Setting?
@@ -26,8 +31,10 @@ model Session {
   creationDate DateTime @default(now())
   startTime    DateTime
   endTime      DateTime
-  username     String
-  user         User     @relation(fields: [username], references: [username], onDelete: Cascade)
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model Setting {

@@ -1,7 +1,7 @@
 import {
-  handleCreateUser, handleGetUsers, handleGetUserByUsername,
+  handleCreateUser, handleGetUsers, handleGetUserByID,
   handleGetSessionsByUser, handlePostSessionsByUser,
-  handleUpdateUser, handlePatchUserByUsername, handleDeleteUser,
+  handleUpdateUser, handlePatchUserByID, handleDeleteUser,
   handleGetSettingByUsername, handleUpdateSettingByUsername,
 } from './user.controller.js';
 import { $ref } from './user.schema.js';
@@ -17,7 +17,7 @@ export async function userRoutes(app) {
   );
   // Register new user
   app.post(
-    '/register',
+    '/',
     {
       schema: {
         body: $ref('createUserSchema'),
@@ -28,13 +28,13 @@ export async function userRoutes(app) {
     },
     handleCreateUser,
   );
-  // Get user by username at /api/users/username. Requires auth
+  // Get user by id at /api/users/:id. Requires auth
   app.get(
-    '/:username',
+    '/:id',
     {
       preHandler: [app.verifyJWT],
     },
-    handleGetUserByUsername,
+    handleGetUserByID,
   );
   // Update user by id at Put /api/users/:id. Requires auth
   app.put(
@@ -47,37 +47,37 @@ export async function userRoutes(app) {
     },
     handleUpdateUser,
   );
-  // Patch user by id at Put /api/users/:id. Use optional values Requires auth
+  // Patch user by id at Put /api/users/:id. Uses optional values Requires auth
   app.patch(
-    '/:username',
+    '/:id',
     {
       preHandler: [app.verifyJWT],
       schema: {
-        body: $ref('patchUserByUsernameSchema'),
+        body: $ref('patchUserByIDSchema'),
       },
     },
-    handlePatchUserByUsername,
+    handlePatchUserByID,
   );
-  // Delete a user given username at /api/users/:username. Requires auth
+  // Delete a user given id at /api/users/:id. Requires auth
   app.delete(
-    '/:username',
+    '/:id',
     {
       preHandler: [app.verifyJWT],
     },
     handleDeleteUser,
   );
 
-  // Get all sessions at /api/users/:username/sessions. Requires auth
+  // Get all sessions at /api/users/:id/sessions. Requires auth
   app.get(
-    '/:username/sessions',
+    '/:id/sessions',
     {
       preHandler: [app.verifyJWT],
     },
     handleGetSessionsByUser,
   );
-  // Create new session at /api/sessions/:username. Requires auth
+  // Create new session at /api/users/:id/sessions/. Requires auth
   app.post(
-    '/:username/sessions',
+    '/:id/sessions',
     {
       preHandler: [app.verifyJWT],
       schema: {
