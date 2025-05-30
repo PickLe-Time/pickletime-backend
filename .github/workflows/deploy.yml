@@ -2,6 +2,13 @@ name: Deploy
 
 on:
   workflow_call:
+    secrets:
+      SSH_HOST:
+        required: true
+      SSH_USER:
+        required: true
+      SSH_PRIVATE_KEY:
+        required: true
   workflow_dispatch:
 
 jobs:

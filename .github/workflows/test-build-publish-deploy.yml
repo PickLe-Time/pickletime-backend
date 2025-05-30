@@ -46,4 +46,8 @@ jobs:
   deploy:
     needs: build-publish
     uses: PickLe-Time/pickletime-backend/.github/workflows/deploy.yml@main
+    secrets:
+      SSH_HOST: ${{ secrets.SSH_HOST }}
+      SSH_USER: ${{ secrets.SSH_USER }}
+      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           
