@@ -45,17 +45,5 @@ jobs:
 
   deploy:
     needs: build-publish
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Deploy to production via SSH
-        uses: appleboy/ssh-action@v1.0.0
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            cd /home/opc/projects/pickletime/pickletime-infra
-            docker compose -f docker-compose.prod.yml pull
-            docker compose -f docker-compose.prod.yml up -d --remove-orphans
+    uses: PickLe-Time/pickletime-backend/.github/workflows/deploy.yml@main
           
