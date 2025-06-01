@@ -1,5 +1,4 @@
 import Fastify from 'fastify';
-import pino from 'pino';
 import dotenv from 'dotenv';
 import fjwt from '@fastify/jwt';
 import fCookie from '@fastify/cookie';
@@ -19,11 +18,10 @@ import { verifyJWT } from './middleware/verifyJWT.js';
 dotenv.config({ path: '.env', debug: true, encoding: 'UTF-8' });
 
 const app = Fastify({ logger: true });
-const logger = pino();
 
 // Start server at port
 export const start = async (port = 5000, host = '0.0.0.0') => {
-  logger.info('Starting PickLeTimeService');
+  app.log.info('Starting PickLeTimeService');
   await app.listen(
     {
       port,
