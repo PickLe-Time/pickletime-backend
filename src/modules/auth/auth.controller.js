@@ -1,5 +1,9 @@
 import bcrypt from 'bcrypt';
+import { OAuth2Client } from 'google-auth-library';
 import prisma from '../../utils/prisma.js';
+import { generateTokens } from '../../utils/generateTokens.js';
+
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // Login user. Checks if user already exists, password matches
 export async function handleLogin(req, reply) {
@@ -8,7 +12,12 @@ export async function handleLogin(req, reply) {
   // Validate user data.
   username = username.toLowerCase();
   // Get if user already exists
-  const user = await prisma.user.findUnique({ where: { username } });
+  const user = await prisma.user.findUnique({
+    where: { username },
+    include: {
+      settings: true,
+    },
+  });
   // Check if password matches user
   const isMatch = user && (await bcrypt.compare(password, user.password));
   // If no user exists or user doesn't match password. invalid message
@@ -18,26 +27,7 @@ export async function handleLogin(req, reply) {
     });
   }
   // Create jwt access and refresh tokens
-  const payload = {
-    id: user.id,
-    username: user.username,
-    role: user.role,
-  };
-  const accessToken = await reply.jwtSign(payload, { expiresIn: '15m' });
-  const refreshToken = await reply.jwtSign(payload, { expiresIn: '7d' });
-  // Save refresh token to current user in DB
-  await prisma.user.update({
-    where: { username: user.username },
-    data: { refreshToken },
-  });
-  // Save refresh token as cookie so that client can request token
-  reply.setCookie('refreshJWT', refreshToken, {
-    path: '/',
-    maxAge: 24 * 60 * 60 * 1000,
-    httpOnly: true,
-    sameSite: 'None',
-    secure: true,
-  });
+  const accessToken = await generateTokens({ user, reply, prisma });
 
   // Return access id, token, username, displayName, and role
   return {
@@ -46,7 +36,68 @@ export async function handleLogin(req, reply) {
     username: user.username,
     displayName: user.displayName,
     role: user.role,
+    settings: user.settings
   };
+}
+
+// Handle Google login. Upsert user in DB, create access token, and return user data
+export async function handleGoogleLogin(req, reply) {
+  const { token } = req.body;
+
+  try {
+    // Get token info from Google
+    console.log('Google token:', {token});
+    const ticket = await client.getTokenInfo(token);
+
+    // Set user data from Google token
+    const email = ticket.email;
+    const googleId = ticket.sub;
+    const username = email.split('@')[0].toLowerCase();
+    const displayName = username;
+
+    console.log({googleId, email, username, displayName});
+
+    if (!email || !googleId) {
+      return reply.code(400).send({ message: 'Invalid Google token' });
+    }
+    // Check if user already exists in DB
+    const existingUser = await prisma.user.findUnique({
+      where: { googleId },
+      include: {
+        settings: true,
+      },
+    });
+    // Upsert user in DB
+    const user = await prisma.user.upsert({
+      where: { username },
+      update: {
+        googleId,
+        displayName: existingUser?.displayName || username,
+      },
+      create: {
+        googleId,
+        username,
+        displayName,
+        role: 'BASIC',
+        settings: { create: {} },
+      },
+      include: {
+        settings: true,
+      },
+    });
+    // Set JWT payload
+    const accessToken = await generateTokens({ user, reply, prisma });
+    return reply.code(200).send({
+    id: user.id,
+    username: user.username,
+    displayName: user.displayName,
+    role: user.role,
+    accessToken,
+    settings: existingUser?.settings || user.settings,
+  });
+  } catch {
+    return reply.code(401).send({ message: 'Invalid Google token' });
+  }
 }
 
 // Logout. Clears cookies and DB refresh token. Client must delete accessToken
