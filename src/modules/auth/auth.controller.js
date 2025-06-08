@@ -77,7 +77,7 @@ export async function handleGoogleLogin(req, reply) {
     role: user.role,
     accessToken,
   });
-  } catch (error) {
+  } catch {
     return reply.code(401).send({ message: 'Invalid Google token' });
   }
 }
