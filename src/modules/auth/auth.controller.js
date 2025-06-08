@@ -12,7 +12,12 @@ export async function handleLogin(req, reply) {
   // Validate user data.
   username = username.toLowerCase();
   // Get if user already exists
-  const user = await prisma.user.findUnique({ where: { username } });
+  const user = await prisma.user.findUnique({
+    where: { username },
+    include: {
+      settings: true,
+    },
+  });
   // Check if password matches user
   const isMatch = user && (await bcrypt.compare(password, user.password));
   // If no user exists or user doesn't match password. invalid message
@@ -31,6 +36,7 @@ export async function handleLogin(req, reply) {
     username: user.username,
     displayName: user.displayName,
     role: user.role,
+    settings: user.settings
   };
 }
 
@@ -52,7 +58,12 @@ export async function handleGoogleLogin(req, reply) {
       return reply.code(400).send({ message: 'Invalid Google token' });
     }
     // Check if user already exists in DB
-    const existingUser = await prisma.user.findUnique({ where: { username } });
+    const existingUser = await prisma.user.findUnique({
+      where: { username },
+      include: {
+        settings: true,
+      },
+    });
     // Upsert user in DB
     const user = await prisma.user.upsert({
       where: { username },
@@ -76,6 +87,7 @@ export async function handleGoogleLogin(req, reply) {
     displayName: user.displayName,
     role: user.role,
     accessToken,
+    settings: existingUser?.settings || user.settings,
   });
   } catch {
     return reply.code(401).send({ message: 'Invalid Google token' });

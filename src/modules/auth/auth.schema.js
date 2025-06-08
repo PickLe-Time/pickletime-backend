@@ -18,6 +18,7 @@ const loginResponseSchema = z.object({
   username: z.string(),
   displayName: z.string(),
   role: z.string(),
+  settings: z.object(),
 });
 
 // Export schemas as Jsons
