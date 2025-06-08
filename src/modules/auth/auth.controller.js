@@ -46,6 +46,7 @@ export async function handleGoogleLogin(req, reply) {
 
   try {
     // Get token info from Google
+    console.log('Google token:', {token});
     const ticket = await client.getTokenInfo(token);
 
     // Set user data from Google token
@@ -54,12 +55,14 @@ export async function handleGoogleLogin(req, reply) {
     const username = email.split('@')[0].toLowerCase();
     const displayName = username;
 
+    console.log({googleId, email, username, displayName});
+
     if (!email || !googleId) {
       return reply.code(400).send({ message: 'Invalid Google token' });
     }
     // Check if user already exists in DB
     const existingUser = await prisma.user.findUnique({
-      where: { username },
+      where: { googleId },
       include: {
         settings: true,
       },
@@ -71,12 +74,14 @@ export async function handleGoogleLogin(req, reply) {
         displayName: existingUser?.displayName || username,
       },
       create: {
-        // googleId,
+        googleId,
         username,
         displayName,
-        password: "12398u1y23dsjkasbupassword", // FIXME: Placeholder password
         role: 'BASIC',
         settings: { create: {} },
+      },
+      include: {
+        settings: true,
       },
     });
     // Set JWT payload
