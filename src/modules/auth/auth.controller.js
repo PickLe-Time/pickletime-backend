@@ -71,6 +71,7 @@ export async function handleGoogleLogin(req, reply) {
     const user = await prisma.user.upsert({
       where: { username },
       update: {
+        googleId,
         displayName: existingUser?.displayName || username,
       },
       create: {
